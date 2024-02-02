@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package messages;
+
+enum MSG_ID {
+    // Client 
+    MSG_CLIENT_CONNECT                  = 0x00;
+    MSG_CLIENT_DISCONNECT               = 0x01;
+    MSG_CLIENT_OK                       = 0x02;
+    MSG_CLIENT_REFUSED                  = 0x03;
+
+    MSG_CLIENT_HEARTBEAT                = 0x04;
+
+    // Server
+    MSG_SERVER_CLOSE                    = 0x10;
+    MSG_SERVER_DISCONNECT               = 0x11;
+}
+
+enum STATUS_CODE {
+    STAT_OK                             = 0x00;
+    
+    // Network
+    STAT_CONNECTION_REFUSED             = 0x10;
+    STAT_CONNECTION_TIMEOUT             = 0x11;
+    
+    // Server
+    STAT_SERVER_ERROR                   = 0x20;
+
+    // Token
+    STAT_TOKEN_INVALID                  = 0x30;
+    STAT_TOKEN_EXPIRED                  = 0x31;
+
+    // Client
+    STAT_CLIENT_ERROR                   = 0x40;
+    STAT_CLIENT_INVALID                 = 0x41;
+}
+
+message ClientConnectRequest {
+    optional int64 clientId = 1;
+    optional string token = 2;
+}
+
+message ClientConnectResponse {
+    optional STATUS_CODE statusCode = 1;
+}
+
+message Frame {
+    MSG_ID msgId = 1;
+    optional int32 frameId = 2;
+    optional bytes data = 3;
+}
