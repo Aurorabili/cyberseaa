@@ -1,3 +1,3 @@
-# cyberseaa
+# cyberseea
 
 comming soon...
