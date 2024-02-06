@@ -14,7 +14,7 @@ ConsoleInput::ConsoleInput(asio::io_context& io_context)
 
 ConsoleInput::~ConsoleInput()
 {
-    m_thread.join();
+    m_thread.detach();
 }
 
 void ConsoleInput::register_command(const std::string& command, CommandHandler handler)
