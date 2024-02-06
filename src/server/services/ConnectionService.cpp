@@ -3,8 +3,9 @@
 #include "server/network/Session.hpp"
 
 ConnectionService::ConnectionService(io_context& ioContext)
-    : m_ioContext(ioContext)
+    : Service(ioContext)
 {
+    logDebug() << "ConnectionService created.";
 }
 
 void ConnectionService::init(u16 port)

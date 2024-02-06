@@ -9,8 +9,13 @@ using asio::io_context;
 
 class Service {
 public:
+    Service(io_context& ioContext)
+        : m_ioContext(ioContext) {};
+    virtual ~Service() = default;
     virtual awaitable<void> start() = 0;
     virtual void stop() = 0;
+    virtual bool isInitialized() = 0;
+    io_context& m_ioContext;
 };
 
 #endif /* SERVICE_HPP_ */

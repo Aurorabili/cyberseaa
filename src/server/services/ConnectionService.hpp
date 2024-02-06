@@ -7,7 +7,7 @@
 
 class ConnectionService : public Service, public std::enable_shared_from_this<ConnectionService> {
 public:
-    ConnectionService(io_context& ioContext);
+    ConnectionService(io_context& _ioContext);
     void init(u16 m_port);
     bool isInitialized() { return m_port != 0; }
 
@@ -19,7 +19,6 @@ private:
     bool m_isRunning = false;
 
     ClientManager m_clientManager;
-    io_context& m_ioContext;
 };
 
 #endif /* CONNECTIONSERVICE_HPP_ */
