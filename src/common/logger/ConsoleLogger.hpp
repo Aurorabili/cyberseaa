@@ -58,7 +58,7 @@ public:
             *this << LoggerUtils::textColor(LoggerColor::White, _color, false);
 
         char levels[4] = { 'D', 'I', 'W', 'E' };
-        *this << "[" << utils::getCurrentTime("%H:%M:%S") << "] [" << levels[log.level()] << "] ";
+        *this << "[" << utils::getCurrentTime("%Y-%m-%d %H:%M:%S") << "] [" << levels[log.level()] << "] ";
 
         if (m_printFileAndLine)
             *this << log.file() << ":" << log.line() << ": ";
