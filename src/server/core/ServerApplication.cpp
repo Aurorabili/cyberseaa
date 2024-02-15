@@ -17,6 +17,9 @@ bool ServerApplication::init()
     ///* Initialize Random */
     std::srand((unsigned int)std::time(nullptr));
 
+    ///* Load Config */
+    ServerConfig::loadConfigFromFile("config.json");
+
     ///* Initialize Logger */
     fs::path log_path = "logs";
     if (!fs::exists(log_path)) {
@@ -43,12 +46,9 @@ bool ServerApplication::init()
 
     LoggerHandler::getInstance().init(log_maxLevel, ServerConfig::server_name, log_filename.string());
 
-    ///* Load Config */
-    ServerConfig::loadConfigFromFile("config.json");
-
     ///* Initialize UUID Provider */
     UUIDProvider::init(ServerConfig::uuid_worker_id, ServerConfig::uuid_datacenter_id, ServerConfig::uuid_twepoch);
-    logInfo() << "UUID Provider initialized. Next UUID:" << UUIDProvider::nextUUID();
+    logDebug() << "UUID Provider initialized. Next UUID:" << UUIDProvider::nextUUID();
 
     ///* Initialize Connection Service */
     auto connectionService = std::make_shared<ConnectionService>(m_ioContext);

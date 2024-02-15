@@ -2,15 +2,21 @@
 #define LOGGERHANDLER_HPP_
 
 #include <condition_variable>
+#include <memory>
 #include <mutex>
 #include <queue>
 #include <thread>
+#include <vector>
 
+#include "common/logger/ConsoleLogger.hpp"
+#include "common/logger/FileLogger.hpp"
+#include "common/logger/Log.hpp"
 #include "common/logger/LogStream.hpp"
 #include "common/logger/Logger.hpp"
 
-class LoggerHandler {
+class LogStream;
 
+class LoggerHandler {
 public:
     ~LoggerHandler()
     {
@@ -19,9 +25,9 @@ public:
         m_thread.join();
     }
 
-    Logger print(LogLevel level, const char* file, int line);
+    LogStream print(LogLevel level, const char* file, int line);
 
-    void post(const std::string& stream);
+    void post(Log&& log);
 
     LogLevel maxLevel() const
     {
@@ -38,7 +44,10 @@ public:
     {
         m_maxLevel = maxLevel;
         m_name = name;
-        m_stream.openFile(filename);
+
+        m_loggers.push_back(std::make_unique<FileLogger>(filename));
+        m_loggers.push_back(std::make_unique<ConsoleLogger>());
+
         m_isRunning = true;
         m_thread = std::thread(&LoggerHandler::run, this);
     }
@@ -52,7 +61,7 @@ private:
 private:
     std::string m_name;
     LogLevel m_maxLevel;
-    LogStream m_stream;
+    std::vector<std::unique_ptr<Logger>> m_loggers;
 
 private:
     void run();
@@ -60,7 +69,7 @@ private:
     bool m_isRunning;
     std::mutex m_mutex;
     std::thread m_thread;
-    std::queue<std::string> m_queue;
+    std::queue<Log> m_queue;
     std::condition_variable m_cv;
 };
 

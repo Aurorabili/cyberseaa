@@ -32,13 +32,11 @@ void ServerConfig::loadConfigFromFile(const char* filepath)
             uuid_worker_id = json["uuid_worker_id"];
             uuid_datacenter_id = json["uuid_datacenter_id"];
             uuid_twepoch = json["uuid_twepoch"];
-
-            logInfo() << "Config loaded.";
         } catch (const std::exception& e) {
-            logError() << "Failed to load config file: %s", e.what();
+            throw std::runtime_error("Failed to load config file: " + std::string(e.what()));
         }
     } else {
-        logWarning() << "Config file not found, using default config.";
+        throw std::runtime_error("Config file not found: " + std::string(filepath));
     }
 }
 
@@ -58,9 +56,7 @@ void ServerConfig::saveConfigToFile(const char* filepath)
 
         std::ofstream file(filepath);
         file << json.dump(4);
-
-        logInfo() << "Config saved.";
     } catch (const std::exception& e) {
-        logError() << "Failed to save config file: %s", e.what();
+        throw std::runtime_error("Failed to save config file: " + std::string(e.what()));
     }
 }

@@ -1,54 +1,61 @@
 #ifndef LOGSTREAM_HPP_
 #define LOGSTREAM_HPP_
 
-#include <fstream>
-#include <iostream>
+#include <sstream>
 #include <string>
 
-class LogStream
-{
-  public:
-    void openFile(const std::string &filename)
+#include "common/logger/LoggerUtils.hpp"
+
+class LogStream {
+public:
+    LogStream(LogLevel level = LogLevel::Debug, const char* file = nullptr, int line = -1,
+        const std::string& sourceName = "")
+        : m_level(level)
+        , m_file(file)
+        , m_line(line)
+        , m_sourceName(sourceName)
     {
-        m_file.open(filename, std::ofstream::out | std::ofstream::trunc);
-        if (!m_file.is_open())
-            std::cerr << "Can't open log file: '" << filename << "'" << std::endl;
     }
 
-    LogStream &operator<<(const std::string &str)
+    ~LogStream();
+
+    void addSpace()
     {
-        std::cout << str;
-        if (m_file.is_open())
-            m_file << str;
+        if (!m_stream.str().empty())
+            m_stream << " ";
+    }
+
+    template <typename T>
+    LogStream& operator<<(const T& object)
+    {
+        addSpace();
+        m_stream << object;
+        return *this;
+    }
+    LogStream& operator<<(const char* str)
+    {
+        addSpace();
+        m_stream << str;
+        return *this;
+    }
+    LogStream& operator<<(const std::string& str)
+    {
+        addSpace();
+        m_stream << "\"" << str << "\"";
         return *this;
     }
 
-    LogStream &operator<<(int i)
-    {
-        std::cout << i;
-        if (m_file.is_open())
-            m_file << i;
-        return *this;
-    }
+    static bool isEnabled;
 
-    LogStream &operator<<(char c)
-    {
-        std::cout << c;
-        if (m_file.is_open())
-            m_file << c;
-        return *this;
-    }
+private:
+    LogLevel m_level;
 
-    LogStream &operator<<(std::ostream &(*f)(std::ostream &))
-    {
-        f(std::cout);
-        if (m_file.is_open())
-            f(m_file);
-        return *this;
-    }
+    const char* m_file = nullptr;
+    int m_line = -1;
 
-  private:
-    std::ofstream m_file;
+    std::string m_sourceName;
+
+    std::stringstream m_stream;
 };
 
 #endif /* LOGSTREAM_HPP_ */

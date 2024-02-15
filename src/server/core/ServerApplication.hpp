@@ -5,7 +5,6 @@
 #include <asio/detached.hpp>
 #include <asio/io_context.hpp>
 
-#include "common/logger/LoggerHandler.hpp"
 #include "common/utils/IntTypes.hpp"
 
 #include "server/services/Service.hpp"

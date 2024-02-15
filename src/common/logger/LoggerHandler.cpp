@@ -1,5 +1,4 @@
 #include "common/logger/LoggerHandler.hpp"
-#include "common/utils/Exception.hpp"
 
 void LoggerHandler::run()
 {
@@ -8,20 +7,23 @@ void LoggerHandler::run()
         m_cv.wait(lock, [this]() { return !m_queue.empty() || !m_isRunning; });
 
         while (!m_queue.empty()) {
-            m_stream << m_queue.front() << std::endl;
+            auto log = m_queue.front();
             m_queue.pop();
+            for (auto& stream : m_loggers) {
+                stream->print(log);
+            }
         }
     }
 }
 
-Logger LoggerHandler::print(LogLevel level, const char* file, int line)
+LogStream LoggerHandler::print(LogLevel level, const char* file, int line)
 {
     return { level >= m_maxLevel ? level : LogLevel::None, file, line, m_name };
 }
 
-void LoggerHandler::post(const std::string& stream)
+void LoggerHandler::post(Log&& log)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_queue.push(stream);
+    m_queue.push(std::move(log));
     m_cv.notify_one();
 }
