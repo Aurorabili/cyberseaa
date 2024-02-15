@@ -18,16 +18,14 @@ bool ServerApplication::init()
     std::srand((unsigned int)std::time(nullptr));
 
     ///* Initialize Logger */
-    LoggerHandler::setInstance(m_loggerHandler);
-    m_loggerHandler.setName(ServerConfig::server_name);
     fs::path log_path = "logs";
     if (!fs::exists(log_path)) {
         fs::create_directory(log_path);
     }
 
-    m_loggerHandler.openLogFile("logs/" + utils::getCurrentTime("%Y-%m-%d_%H-%M-%S") + ".log");
+    auto log_filename = log_path / (utils::getCurrentTime("%Y-%m-%d_%H-%M-%S") + ".log");
 
-    m_loggerHandler.setMaxLevel([]() -> LogLevel {
+    auto log_maxLevel = []() -> LogLevel {
         if (ServerConfig::log_level == "debug") {
             return LogLevel::Debug;
         } else if (ServerConfig::log_level == "info") {
@@ -41,7 +39,9 @@ bool ServerApplication::init()
 
             return LogLevel::Info;
         }
-    }());
+    }();
+
+    LoggerHandler::getInstance().init(log_maxLevel, ServerConfig::server_name, log_filename.string());
 
     ///* Load Config */
     ServerConfig::loadConfigFromFile("config.json");

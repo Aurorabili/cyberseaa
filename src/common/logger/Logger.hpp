@@ -19,11 +19,11 @@ enum LogLevel : u8 {
 class LogStream;
 
 class Logger {
+
 public:
-    Logger(LogStream& stream, LogLevel level = LogLevel::Debug, const char* file = nullptr, int line = -1,
+    Logger(LogLevel level = LogLevel::Debug, const char* file = nullptr, int line = -1,
         const std::string& sourceName = "")
-        : m_outStream(stream)
-        , m_level(level)
+        : m_level(level)
         , m_file(file)
         , m_line(line)
         , m_sourceName(sourceName)
@@ -39,6 +39,7 @@ public:
         }())
     {
     }
+
     ~Logger()
     {
         print();
@@ -87,8 +88,6 @@ public:
 
 private:
     void print();
-
-    LogStream& m_outStream;
 
     LogLevel m_level;
 

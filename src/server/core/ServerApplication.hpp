@@ -28,7 +28,6 @@ private:
     bool m_singlePlayer;
 
     io_context m_ioContext;
-    LoggerHandler m_loggerHandler;
 
     std::unordered_map<std::string, std::shared_ptr<Service>> m_services;
 };
