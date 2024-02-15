@@ -10,6 +10,13 @@ ConsoleInput::ConsoleInput(asio::io_context& io_context)
     register_command("stop", [this](const std::string&) {
         this->m_ioContext.stop();
     });
+
+    register_command("__debug_test_logger", [](const std::string&) {
+        logDebug() << "Debug message";
+        logInfo() << "Info message";
+        logWarning() << "Warning message";
+        logError() << "Error message";
+    });
 }
 
 ConsoleInput::~ConsoleInput()
