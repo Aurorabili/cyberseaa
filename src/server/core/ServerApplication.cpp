@@ -49,6 +49,11 @@ bool ServerApplication::init()
     UUIDProvider::init(ServerConfig::uuid_worker_id, ServerConfig::uuid_datacenter_id, ServerConfig::uuid_twepoch);
     logDebug() << "UUID Provider initialized. Next UUID:" << UUIDProvider::nextUUID();
 
+    ///* Initialize Connection Service */
+    auto connectionService = std::make_shared<ConnectionService>(m_threadPool.getIoContext());
+    connectionService->init(ServerConfig::server_port);
+    m_services.emplace("ConnectionService", connectionService);
+
     ///* Register Console Commands */
     registerConsoleCommand("stop", [this](const std::string&) {
         this->m_isRunning = false;
@@ -66,11 +71,6 @@ bool ServerApplication::init()
 void ServerApplication::run()
 {
     bool isInitialized = init();
-
-    ///* Initialize Connection Service */
-    auto connectionService = std::make_shared<ConnectionService>(m_threadPool.getIoContext());
-    connectionService->init(ServerConfig::server_port);
-    m_services.emplace("ConnectionService", connectionService);
 
     for (auto& [name, service] : m_services) {
         co_spawn(m_threadPool.getIoContext(), service->start(), detached);
