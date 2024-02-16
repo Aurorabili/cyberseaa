@@ -1,22 +1,29 @@
 #include "common/logger/LoggerHandler.hpp"
-#include "common/utils/Exception.hpp"
 
-LoggerHandler::InstanceMap LoggerHandler::s_instanceMap;
-
-Logger LoggerHandler::print(LogLevel level, const char* file, int line)
+void LoggerHandler::run()
 {
-    return { m_stream, level >= m_maxLevel ? level : LogLevel::None, file, line, m_name };
+    while (m_isRunning) {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        m_cv.wait(lock, [this]() { return !m_queue.empty() || !m_isRunning; });
+
+        while (!m_queue.empty()) {
+            auto log = m_queue.front();
+            m_queue.pop();
+            for (auto& stream : m_loggers) {
+                stream->print(log);
+            }
+        }
+    }
 }
 
-LoggerHandler& LoggerHandler::getInstance()
+LogStream LoggerHandler::print(LogLevel level, const char* file, int line)
 {
-    if (s_instanceMap.empty())
-        throw EXCEPTION("LoggerHandler is not initialized");
-
-    return *s_instanceMap.at(std::this_thread::get_id());
+    return { level >= m_maxLevel ? level : LogLevel::None, file, line, m_name };
 }
 
-void LoggerHandler::setInstance(LoggerHandler& instance)
+void LoggerHandler::post(Log&& log)
 {
-    s_instanceMap.emplace(std::this_thread::get_id(), &instance);
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_queue.push(std::move(log));
+    m_cv.notify_one();
 }

@@ -22,6 +22,9 @@ public:
     std::set<ClientInfoPtr> getClients() const;
     ClientInfoPtr getClientById(s64 id) const;
 
+public:
+    void onMessageReceived(ClientInfoPtr client, const std::string& msg);
+
 private:
     std::unordered_map<s64, ClientInfoPtr> m_clients;
 };

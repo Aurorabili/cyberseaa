@@ -1,6 +1,7 @@
 #ifndef CLIENTINFO_HPP_
 #define CLIENTINFO_HPP_
 
+#include <asio/ip/tcp.hpp>
 #include <string>
 
 #include "common/utils/IntTypes.hpp"
@@ -13,7 +14,6 @@ public:
 
     s64 getId() const;
     void setId(const s64 _id) { this->m_id = _id; }
-
     std::string getName() const;
     void setName(const std::string _name) { this->m_name = _name; }
 

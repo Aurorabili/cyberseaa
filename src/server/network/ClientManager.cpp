@@ -1,4 +1,5 @@
 #include "server/network/ClientManager.hpp"
+
 #include "common/core/UUIDProvider.hpp"
 #include "common/utils/Debug.hpp"
 
@@ -38,4 +39,17 @@ ClientInfoPtr ClientManager::getClientById(s64 id) const
         return client->second;
     }
     return nullptr;
+}
+
+void ClientManager::onMessageReceived(ClientInfoPtr client, const std::string& msg)
+{
+    logInfo() << LOG_PREFIX << "Message received from client " << client->getId() << ": " << msg;
+
+    auto handle_message = [msg, client]() -> void {
+        u16 wait_time = std::stoi(msg);
+        std::this_thread::sleep_for(std::chrono::seconds(wait_time));
+        client->send("Waited for " + std::to_string(wait_time) + " seconds.");
+    };
+
+
 }

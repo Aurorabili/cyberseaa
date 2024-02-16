@@ -21,7 +21,7 @@ awaitable<void> ConnectionService::start()
         co_return;
     }
 
-    logInfo() << "Start listening on port " << m_port << ".";
+    logInfo() << "Start listening on port" << m_port << ".";
     m_isRunning = true;
     tcp::acceptor acceptor(m_ioContext, { tcp::v4(), m_port });
     while (m_isRunning) {

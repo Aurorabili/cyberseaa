@@ -2,20 +2,25 @@ add_rules("mode.debug", "mode.release")
 
 add_includedirs("src")
 
-add_requires("nlohmann_json","asio","protobuf-cpp")
+add_requires(
+    "nlohmann_json",
+    "asio",
+    "protobuf-cpp",
+    "concurrentqueue"
+)
 
 target("common")
     set_kind("static")
     add_files("src/common/**.cpp")
     set_languages("c++20")
-    add_packages("nlohmann_json","asio","protobuf-cpp")
+    add_packages("nlohmann_json","asio","protobuf-cpp", "concurrentqueue")
 
 target("server")
     set_kind("binary")
     add_files("src/server/**.cpp")
     set_languages("c++20")
     add_deps("common")
-    add_packages("nlohmann_json","asio","protobuf-cpp")
+    add_packages("nlohmann_json","asio","protobuf-cpp", "concurrentqueue")
 
 
 

@@ -1,51 +1,76 @@
 #ifndef LOGGERHANDLER_HPP_
 #define LOGGERHANDLER_HPP_
 
+#include <condition_variable>
+#include <memory>
+#include <mutex>
+#include <queue>
 #include <thread>
-#include <unordered_map>
+#include <vector>
 
+#include "common/logger/ConsoleLogger.hpp"
+#include "common/logger/FileLogger.hpp"
+#include "common/logger/Log.hpp"
 #include "common/logger/LogStream.hpp"
 #include "common/logger/Logger.hpp"
 
-class LoggerHandler
-{
-    using InstanceMap = std::unordered_map<std::thread::id, LoggerHandler *>;
+class LogStream;
 
-  public:
-    LoggerHandler() = default;
+class LoggerHandler {
+public:
+    ~LoggerHandler()
+    {
+        m_isRunning = false;
+        m_cv.notify_one();
+        m_thread.join();
+    }
 
-    Logger print(LogLevel level, const char *file, int line);
+    LogStream print(LogLevel level, const char* file, int line);
+
+    void post(Log&& log);
 
     LogLevel maxLevel() const
     {
         return m_maxLevel;
     }
-    void setMaxLevel(LogLevel maxLevel)
+
+    static LoggerHandler& getInstance()
+    {
+        static LoggerHandler instance;
+        return instance;
+    }
+
+    void init(LogLevel maxLevel, const std::string& name, const std::string& filename)
     {
         m_maxLevel = maxLevel;
-    }
-
-    void setName(const std::string &name)
-    {
         m_name = name;
+
+        m_loggers.push_back(std::make_unique<FileLogger>(filename));
+        m_loggers.push_back(std::make_unique<ConsoleLogger>());
+
+        m_isRunning = true;
+        m_thread = std::thread(&LoggerHandler::run, this);
     }
 
-    void openLogFile(const std::string &filename)
-    {
-        m_stream.openFile(filename);
-    }
+private:
+    LoggerHandler() = default;
 
-    static LoggerHandler &getInstance();
-    static void setInstance(LoggerHandler &instance);
+    LoggerHandler(const LoggerHandler&) = delete;
+    LoggerHandler& operator=(const LoggerHandler&) = delete;
 
-  private:
-    static InstanceMap s_instanceMap;
-
+private:
     std::string m_name;
+    LogLevel m_maxLevel;
+    std::vector<std::unique_ptr<Logger>> m_loggers;
 
-    LogLevel m_maxLevel = LogLevel::Debug;
+private:
+    void run();
 
-    LogStream m_stream;
+    bool m_isRunning;
+    std::mutex m_mutex;
+    std::thread m_thread;
+    std::queue<Log> m_queue;
+    std::condition_variable m_cv;
 };
 
 #endif // LOGGERHANDLER_HPP_
