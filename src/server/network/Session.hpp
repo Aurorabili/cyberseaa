@@ -1,8 +1,6 @@
 #ifndef SESSION_HPP_
 #define SESSION_HPP_
 
-#include <asio/read_until.hpp>
-#include <asio/write.hpp>
 #include <deque>
 #include <memory>
 
@@ -11,7 +9,10 @@
 #include <asio/detached.hpp>
 #include <asio/io_context.hpp>
 #include <asio/ip/tcp.hpp>
+#include <asio/read_until.hpp>
 #include <asio/redirect_error.hpp>
+#include <asio/strand.hpp>
+#include <asio/write.hpp>
 
 #include "server/network/ClientInfo.hpp"
 #include "server/network/ClientManager.hpp"
@@ -61,7 +62,7 @@ private:
             for (std::string read_msg;;) {
                 std::size_t n = co_await asio::async_read_until(m_socket,
                     asio::dynamic_buffer(read_msg, 1024), "\n", use_awaitable);
-
+                m_clientManager.onMessageReceived(shared_from_this(), read_msg.substr(0, n - 1));
                 read_msg.erase(0, n);
             }
         } catch (std::exception&) {

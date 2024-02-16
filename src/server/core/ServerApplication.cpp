@@ -6,7 +6,6 @@
 #include "common/logger/LoggerHandler.hpp"
 #include "common/utils/Debug.hpp"
 #include "common/utils/Utils.hpp"
-#include "server/core/ConsoleInput.hpp"
 #include "server/core/ServerConfig.hpp"
 #include "server/services/ConnectionService.hpp"
 
@@ -50,11 +49,17 @@ bool ServerApplication::init()
     UUIDProvider::init(ServerConfig::uuid_worker_id, ServerConfig::uuid_datacenter_id, ServerConfig::uuid_twepoch);
     logDebug() << "UUID Provider initialized. Next UUID:" << UUIDProvider::nextUUID();
 
-    ///* Initialize Connection Service */
-    auto connectionService = std::make_shared<ConnectionService>(m_ioContext);
-    connectionService->init(ServerConfig::server_port);
-    m_services.emplace("ConnectionService", connectionService);
+    ///* Register Console Commands */
+    registerConsoleCommand("stop", [this](const std::string&) {
+        this->m_isRunning = false;
+    });
 
+    registerConsoleCommand("__debug_test_logger", [](const std::string&) {
+        logDebug() << "Debug message";
+        logInfo() << "Info message";
+        logWarning() << "Warning message";
+        logError() << "Error message";
+    });
     return true;
 }
 
@@ -62,15 +67,21 @@ void ServerApplication::run()
 {
     bool isInitialized = init();
 
-    for (auto& [name, service] : m_services) {
-        co_spawn(m_ioContext, service->start(), detached);
-    }
+    ///* Initialize Connection Service */
+    auto connectionService = std::make_shared<ConnectionService>(m_threadPool.getIoContext());
+    connectionService->init(ServerConfig::server_port);
+    m_services.emplace("ConnectionService", connectionService);
 
-    ConsoleInput consoleInput(m_ioContext);
+    for (auto& [name, service] : m_services) {
+        co_spawn(m_threadPool.getIoContext(), service->start(), detached);
+    }
 
     logInfo() << "Server started.";
 
-    m_ioContext.run();
+    m_threadPool.run();
+    m_isRunning = true;
+
+    listenConsoleInput();
 
     if (isInitialized) {
         logInfo() << "Stopping server...";
@@ -84,6 +95,27 @@ void ServerApplication::run()
 
     logInfo() << "Server stopped.";
 
-    m_ioContext.stop();
+    m_threadPool.stop();
     return;
+}
+
+void ServerApplication::registerConsoleCommand(const std::string& command, CommandHandler handler)
+{
+    m_consoleCommandHandlers.emplace(command, handler);
+}
+
+void ServerApplication::listenConsoleInput()
+{
+    std::string line;
+
+    while (m_isRunning) {
+        std::getline(std::cin, line);
+        logDebug() << "Console Input:" << line;
+        auto it = m_consoleCommandHandlers.find(line);
+        if (it != m_consoleCommandHandlers.end()) {
+            it->second(line);
+        } else {
+            logError() << "Unknown command:" << line;
+        }
+    }
 }
