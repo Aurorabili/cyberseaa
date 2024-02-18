@@ -106,9 +106,9 @@ void ServerApplication::run()
 
     ServerConfig::saveConfigToFile("config.json");
 
-    logInfo() << "Server stopped.";
-
     m_threadPool.stop();
+
+    logInfo() << "Server stopped.";
     return;
 }
 
