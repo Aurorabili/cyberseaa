@@ -7,6 +7,7 @@
 
 #include "common/utils/IntTypes.hpp"
 
+#include "server/core/MessageBus.hpp"
 #include "server/core/ThreadPool.hpp"
 #include "server/services/Service.hpp"
 
@@ -19,6 +20,11 @@ public:
     using CommandHandler = std::function<void(const std::string&)>;
 
 public:
+    ServerApplication()
+        : m_messageBus(m_services)
+    {
+    }
+
     bool init();
     void run();
 
@@ -39,6 +45,8 @@ private:
     ThreadPool m_threadPool;
 
     std::unordered_map<std::string, std::shared_ptr<Service>> m_services;
+
+    MessageBus m_messageBus;
 
 private:
     std::unordered_map<std::string, CommandHandler> m_consoleCommandHandlers;

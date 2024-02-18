@@ -2,6 +2,8 @@
 
 #include "common/core/UUIDProvider.hpp"
 #include "common/utils/Debug.hpp"
+#include "server/services/EchoService.hpp"
+#include <memory>
 
 void ClientManager::addClient(ClientInfoPtr client)
 {
@@ -43,13 +45,8 @@ ClientInfoPtr ClientManager::getClientById(s64 id) const
 
 void ClientManager::onMessageReceived(ClientInfoPtr client, const std::string& msg)
 {
-    logInfo() << LOG_PREFIX << "Message received from client " << client->getId() << ": " << msg;
+    logInfo() << LOG_PREFIX << "Message received from client" << client->getId() << ">>" << msg;
 
-    auto handle_message = [msg, client]() -> void {
-        u16 wait_time = std::stoi(msg);
-        std::this_thread::sleep_for(std::chrono::seconds(wait_time));
-        client->send("Waited for " + std::to_string(wait_time) + " seconds.");
-    };
-
-
+    auto echoMsg = std::make_unique<EchoMessage>(client, msg, "ConnectionService");
+    m_messageBus.send(std::move(echoMsg));
 }
