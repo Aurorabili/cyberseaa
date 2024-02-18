@@ -1,13 +1,16 @@
 #include "server/core/ServerApplication.hpp"
 
 #include <filesystem>
+#include <memory>
 
 #include "common/core/UUIDProvider.hpp"
 #include "common/logger/LoggerHandler.hpp"
 #include "common/utils/Debug.hpp"
 #include "common/utils/Utils.hpp"
+#include "server/core/MessageBus.hpp"
 #include "server/core/ServerConfig.hpp"
 #include "server/services/ConnectionService.hpp"
+#include "server/services/EchoService.hpp"
 
 namespace fs = std::filesystem;
 
@@ -50,9 +53,13 @@ bool ServerApplication::init()
     logDebug() << "UUID Provider initialized. Next UUID:" << UUIDProvider::nextUUID();
 
     ///* Initialize Connection Service */
-    auto connectionService = std::make_shared<ConnectionService>(m_threadPool.getIoContext());
+    auto connectionService = std::make_shared<ConnectionService>(m_threadPool, m_messageBus);
     connectionService->init(ServerConfig::server_port);
-    m_services.emplace("ConnectionService", connectionService);
+    m_services.emplace(connectionService->getName(), connectionService);
+
+    ///* Initialize EchoService */
+    auto echoService = std::make_shared<EchoService>(m_threadPool);
+    m_services.emplace(echoService->getName(), echoService);
 
     ///* Register Console Commands */
     registerConsoleCommand("stop", [this](const std::string&) {
@@ -74,12 +81,18 @@ void ServerApplication::run()
 
     for (auto& [name, service] : m_services) {
         co_spawn(m_threadPool.getIoContext(), service->start(), detached);
+        logDebug() << name << "Service loaded.";
     }
 
+    m_threadPool.post([this]() {
+        while (m_isRunning) {
+            m_messageBus.processOne();
+        }
+    });
     logInfo() << "Server started.";
 
-    m_threadPool.run();
     m_isRunning = true;
+    m_threadPool.run();
 
     listenConsoleInput();
 

@@ -2,12 +2,6 @@
 #include "common/utils/Debug.hpp"
 #include "server/network/Session.hpp"
 
-ConnectionService::ConnectionService(io_context& ioContext)
-    : Service(ioContext)
-{
-    logDebug() << "ConnectionService created.";
-}
-
 void ConnectionService::init(u16 port)
 {
     m_port = port;
@@ -23,7 +17,7 @@ awaitable<void> ConnectionService::start()
 
     logInfo() << "Start listening on port" << m_port << ".";
     m_isRunning = true;
-    tcp::acceptor acceptor(m_ioContext, { tcp::v4(), m_port });
+    tcp::acceptor acceptor(m_threadPool.getIoContext(), { tcp::v4(), m_port });
     while (m_isRunning) {
         std::make_shared<Session>(co_await acceptor.async_accept(use_awaitable),
             m_clientManager)
