@@ -4,6 +4,8 @@
 #include <sstream>
 #include <vector>
 
+#include "common/utils/IntTypes.hpp"
+
 namespace utils {
 
 template <typename T>
@@ -28,6 +30,11 @@ std::string makeString(Args&&... args)
 
 std::string getCurrentTime(const char* format);
 
+template <typename T>
+time_t toTimeT(const u64 timestamp);
+
+template <typename T>
+u64 toTimeStamp(const time_t time);
 } // namespace utils
 
 #endif // UTILS_HPP_

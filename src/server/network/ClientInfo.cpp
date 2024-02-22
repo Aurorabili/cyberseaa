@@ -2,6 +2,4 @@
 
 ClientInfo::~ClientInfo() { }
 
-s64 ClientInfo::getId() const { return m_id; }
-
-std::string ClientInfo::getName() const { return m_name; }
+s64 ClientInfo::getId() const { return m_clientId; }

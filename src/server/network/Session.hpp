@@ -55,6 +55,12 @@ public:
         m_timer.cancel_one();
     }
 
+    void disconnect()
+    {
+        send("The server actively disconnects. bye\n");
+        stop();
+    }
+
 private:
     awaitable<void> reader()
     {
@@ -93,6 +99,11 @@ private:
         m_clientManager.removeClient(shared_from_this());
         m_socket.close();
         m_timer.cancel();
+    }
+
+    asio::ip::address IpAddress() const
+    {
+        return m_socket.remote_endpoint().address();
     }
 
 private:
