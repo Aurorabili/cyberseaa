@@ -1,9 +1,8 @@
-#include "server/core/ServerApplication.hpp"
+#include "server/app/ServerApplication.hpp"
 
 int main()
 {
-    ServerApplication app;
-
+    App::ServerApplication app;
     app.run();
     return 0;
 }

@@ -1,0 +1,114 @@
+syntax = "proto3";
+
+package PlayerProto;
+
+enum MessageType {
+    // player socket
+    PLAYER_CONNECT = 0x00;
+    PLAYER_DISCONNECT = 0x01;
+
+    // player action
+    PLAYER_MOVE = 0x10;
+    PLAYER_SHOP = 0x11;
+    PLAYER_INFO = 0x12;
+    PLAYER_CHAT = 0x13;
+
+    // player error
+    PLAYER_ERROR = 0x90;
+}
+
+enum ErrorCode {
+    // player error
+    SUCCESS = 0x00;
+    UNKOWN_ERROR = 0x99;
+}
+
+enum ShopType {
+    // player shop
+    SHOP_BUY = 0;
+    SHOP_SELL = 1;
+}
+
+enum TradeStatus {
+    // player shop
+    TRADE_SUCCESS = 0x00;   // OK - make a deal
+
+    TRADE_NOTENOUGH_MONEY = 0x10;   // not enough money
+    TRADE_NOTENOUGH_ITEM = 0x11;    // not enough item
+    TRADE_OVERFLOW = 0x12;           // overflow - The amount is too large
+    TRADE_NOTFOUND_ITEM = 0x13;      // item not found
+    TRADE_NOTFOUND_SHOP = 0x14;      // shop not found
+    TRADE_UNKNOWN_ERROR = 0x19;      // unknown error
+}
+
+message MessageHeader {
+    int64 messageId = 1;
+    MessageType messageType = 2;
+    int64 playerId = 3;
+    uint32 messageLength = 4;
+}
+
+message C2S_PlayerConnect {
+    MessageHeader header = 1;
+    
+    oneof body {
+        string playerName = 2;
+    }
+}
+
+message S2C_PlayerConnect {
+    MessageHeader header = 1;
+    
+    oneof body {
+        string res = 2;
+    }
+}
+
+message C2S_PlayerDisconnect {
+    MessageHeader header = 1;
+}
+
+message C2S_PlayerMove {
+    MessageHeader header = 1;
+}
+
+message S2C_PlayerMove {
+    MessageHeader header = 1;
+    
+    oneof body {
+        int32 x = 2;
+        int32 y = 3;
+        int32 z = 4;
+    }
+}
+
+message C2S_PlayerInfo {
+    MessageHeader header = 1;
+}
+
+message S2C_PlayerInfo {
+    MessageHeader header = 1;
+    
+    oneof body {
+        string playerName = 2;
+        int32 level = 3;
+        int32 money = 4;
+    }
+}
+
+message C2S_PlayerChat {
+    MessageHeader header = 1;
+    
+    oneof body {
+        string chat = 2;
+    }
+}
+
+message S2C_PlayerChat {
+    MessageHeader header = 1;
+    
+    oneof body {
+        int64 playerId = 2;
+        string chat = 3;
+    }
+}

@@ -6,7 +6,8 @@ add_requires(
     "nlohmann_json",
     "asio",
     "protobuf-cpp",
-    "concurrentqueue"
+    "concurrentqueue",
+    "fmt"
 )
 
 target("common")
@@ -21,8 +22,6 @@ target("server")
     set_languages("c++20")
     add_deps("common")
     add_packages("nlohmann_json","asio","protobuf-cpp", "concurrentqueue")
-
-
 
 
 --
