@@ -70,8 +70,10 @@ void App::ServerApplication::run()
 
     std::unique_ptr<Core::ServiceConfig> conf = std::make_unique<Core::ServiceConfig>();
     conf->type = "internal";
-    conf->name = "PlayerHandler";
+    conf->name = "GateHandler";
+    conf->unique = true;
     _server->newService(std::move(conf));
+    _server->setUniqueService("GateHandler", BOOTSTRAP_ADDR);
 
     exitcode = _server->run();
 }

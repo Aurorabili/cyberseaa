@@ -4,6 +4,7 @@
 #include <asio/awaitable.hpp>
 #include <string>
 
+#include "common/Debug.hpp"
 #include "server/core/services/Handler.hpp"
 #include "server/core/services/InternalService.hpp"
 #include "server/interface/internal/Core.hpp"
@@ -13,16 +14,20 @@ public:
     PlayerHandler(Core::InternalService* service)
         : Core::Handler(service)
     {
-        Interface::Internal::async(service, [this]() -> asio::awaitable<void> {
-            start();
-            co_return;
+        m_service->registerCommand("setFd", [this](const std::string& data) {
+            logDebug("PlayerHandler: setFd: %s", data.c_str());
+            m_fd = std::stoi(data);
+            Interface::Internal::async(m_service, [this]() -> asio::awaitable<void> {
+                co_await start();
+            });
         });
     }
 
-    void start();
+    asio::awaitable<void> start();
 
 private:
     std::string m_playerName;
+    s32 m_fd;
 };
 
 #endif // PLAYERSERVICE_HPP_

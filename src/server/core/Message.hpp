@@ -144,6 +144,21 @@ public:
         return m_data ? m_data.get() : nullptr;
     }
 
+    bool empty() const
+    {
+        return m_data ? m_data == nullptr : true;
+    }
+
+    Message clone() const
+    {
+        auto msg = Message(m_data->size());
+        msg.m_sender = m_sender;
+        msg.m_receiver = m_receiver;
+        msg.m_type = m_type;
+        msg.m_sessionid = m_sessionid;
+        msg.m_data->write_back(m_data->data(), m_data->size());
+        return msg;
+    }
 
 private:
     u8 m_type = 0;

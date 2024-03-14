@@ -1,6 +1,7 @@
 #ifndef HANDLER_HPP_
 #define HANDLER_HPP_
 
+#include <asio/awaitable.hpp>
 namespace Core {
 class InternalService;
 class Handler {
@@ -17,7 +18,7 @@ public:
     Handler& operator=(const Handler&&) = delete;
 
 public:
-    // virtual void run() = 0;
+    virtual asio::awaitable<void> start() = 0;
 
 protected:
     Core::InternalService* m_service;

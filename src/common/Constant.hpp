@@ -104,6 +104,7 @@ constexpr u8 PTYPE_SOCKET_TCP = 8;
 constexpr u8 PTYPE_SOCKET_UDP = 9;
 constexpr u8 PTYPE_SOCKET_WS = 10;
 constexpr uint8_t PTYPE_INTEGER = 12;
+constexpr u8 PTYPE_COMMAND = 13;
 
 constexpr u32 BOOTSTRAP_ADDR = 0x01000001; // The first service's id
 }

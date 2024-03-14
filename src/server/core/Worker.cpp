@@ -107,6 +107,8 @@ void Worker::new_service(std::unique_ptr<ServiceConfig> conf)
             s->setReady();
             m_services.emplace(serviceid, std::move(s));
 
+            logDebug("new service[%08X] type[%s] name[%s] threadid[%u] ready.", serviceid, conf->type.data(), conf->name.data(), conf->threadid);
+
             if (0 != conf->session) {
                 m_server->response(conf->creator, std::to_string(serviceid), conf->session, PTYPE_INTEGER);
             }
