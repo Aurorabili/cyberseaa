@@ -14,7 +14,7 @@
 #include "common/utils/String.hpp"
 #include "server/core/Message.hpp"
 #include "server/core/Worker.hpp"
-#include "server/core/services/Service.hpp"
+#include "server/core/Service.hpp"
 
 namespace Core {
 

@@ -7,8 +7,8 @@
 
 #include "common/ConcurrentQueue.hpp"
 #include "server/core/Message.hpp"
+#include "server/core/Service.hpp"
 #include "server/core/network/SocketServer.hpp"
-#include "server/core/services/Service.hpp"
 
 namespace Core {
 class Server;

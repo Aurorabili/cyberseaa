@@ -151,12 +151,12 @@ public:
 
     Message clone() const
     {
-        auto msg = Message(m_data->size());
+        auto msg = Message();
         msg.m_sender = m_sender;
         msg.m_receiver = m_receiver;
         msg.m_type = m_type;
         msg.m_sessionid = m_sessionid;
-        msg.m_data->write_back(m_data->data(), m_data->size());
+        msg.m_data = Buffer::make_unique(m_data->clone());
         return msg;
     }
 

@@ -3,11 +3,12 @@
 #include <filesystem>
 #include <memory>
 
-#include "common/Debug.hpp"
 #include "common/Exception.hpp"
-#include "common/Time.hpp"
-#include "server/core/services/InternalService.hpp"
-#include "server/core/services/Service.hpp"
+#include "server/core/Server.hpp"
+#include "server/core/Service.hpp"
+#include "server/core/Worker.hpp"
+#include "server/services/Bootstrap/BootstrapService.hpp"
+#include "server/services/Echo/EchoService.hpp"
 
 static std::weak_ptr<Core::Server> m_wkServer;
 
@@ -58,8 +59,12 @@ void App::ServerApplication::run()
     std::shared_ptr<Core::Server> _server = std::make_shared<Core::Server>();
     m_wkServer = _server;
 
-    _server->registerService("internal", []() -> Core::ServicePtr {
-        return std::make_unique<Core::InternalService>();
+    _server->registerService("BootstrapService", []() -> Core::ServicePtr {
+        return std::make_unique<BootstrapService>();
+    });
+
+    _server->registerService("EchoService", []() -> Core::ServicePtr {
+        return std::make_unique<EchoService>();
     });
 
     auto& logger = Log::instance();
@@ -69,11 +74,11 @@ void App::ServerApplication::run()
     _server->init(thread_count);
 
     std::unique_ptr<Core::ServiceConfig> conf = std::make_unique<Core::ServiceConfig>();
-    conf->type = "internal";
-    conf->name = "GateHandler";
+    conf->type = "BootstrapService";
+    conf->name = "BootstrapService";
     conf->unique = true;
     _server->newService(std::move(conf));
-    _server->setUniqueService("GateHandler", BOOTSTRAP_ADDR);
+    _server->setUniqueService("BootstrapService", BOOTSTRAP_ADDR);
 
     exitcode = _server->run();
 }

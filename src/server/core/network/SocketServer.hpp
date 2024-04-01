@@ -11,7 +11,7 @@
 #include "common/Buffer.hpp"
 #include "server/core/Message.hpp"
 #include "server/core/Server.hpp"
-#include "server/core/services/Service.hpp"
+#include "server/core/Service.hpp"
 
 using asio::io_context;
 using asio::ip::tcp;
@@ -103,7 +103,7 @@ public:
 
     bool udp_connect(uint32_t fd, std::string_view host, uint16_t port);
 
-    bool accept(uint32_t fd, int32_t sessionid, uint32_t owner);
+    bool accept(uint32_t fd, u32 sender, int32_t sessionid, uint32_t owner);
 
     uint32_t connect(const std::string& host, uint16_t port, uint32_t owner, uint8_t type, int32_t sessionid, uint32_t millseconds = 0);
 
@@ -136,7 +136,7 @@ private:
 
     void response(uint32_t sender, uint32_t receiver, std::string_view data, int32_t sessionid, uint8_t type);
 
-    void addConnection(SocketServer* from, const acceptor_context_ptr_t& ctx, const ConnectionPtr& c, int32_t sessionid);
+    void addConnection(SocketServer* from, const acceptor_context_ptr_t& ctx, const ConnectionPtr& c, uint32_t sender, int32_t sessionid);
 
     template <typename Message>
     void handleMessage(uint32_t serviceid, Message&& m);

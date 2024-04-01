@@ -2,11 +2,16 @@
 #define SERVICE_HPP_
 
 #include <asio/awaitable.hpp>
+#include <asio/co_spawn.hpp>
+#include <coroutine>
+#include <memory>
+#include <unordered_map>
 #include <utility>
 
 #include "common/Exception.hpp"
 #include "common/utils/IntTypes.hpp"
 #include "server/core/Message.hpp"
+#include "server/core/Session.hpp"
 
 namespace Core {
 class Server;
@@ -78,6 +83,30 @@ public:
         m_isReady = true;
     }
 
+    s32 nextSessionId()
+    {
+        s32 sessionId = m_nowSessionId;
+        while (sessions.find(sessionId) != sessions.end()) {
+            sessionId++;
+        }
+        m_nowSessionId = sessionId;
+        return sessionId;
+    }
+
+    void addSession(s32 sessionId, std::shared_ptr<Session<std::shared_ptr<Core::Message>>> session)
+    {
+        sessions[sessionId] = session;
+    }
+
+    void resumeSession(s32 sessionId, std::shared_ptr<Core::Message> msg)
+    {
+        auto it = sessions.find(sessionId);
+        if (it != sessions.end()) {
+            it->second->resume(msg);
+            sessions.erase(it);
+        }
+    }
+
 public:
     virtual bool init(const ServiceConfig& conf) = 0;
 
@@ -101,6 +130,8 @@ protected:
     Server* m_server = nullptr;
     Worker* m_worker = nullptr;
     std::string m_name;
+    std::unordered_map<s32, std::shared_ptr<Session<std::shared_ptr<Core::Message>>>> sessions;
+    s32 m_nowSessionId = 1;
 };
 
 template <typename Service, typename Message>

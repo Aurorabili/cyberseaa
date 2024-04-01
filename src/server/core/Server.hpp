@@ -14,7 +14,7 @@
 #include "common/Timer.hpp"
 #include "common/Types.hpp"
 #include "common/utils/IntTypes.hpp"
-#include "server/core/services/Service.hpp"
+#include "server/core/Service.hpp"
 
 namespace Core {
 

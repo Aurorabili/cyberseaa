@@ -7,7 +7,7 @@
 #include "common/utils/String.hpp"
 #include "server/core/Message.hpp"
 #include "server/core/Server.hpp"
-#include "server/core/services/Service.hpp"
+#include "server/core/Service.hpp"
 
 using namespace std::literals::string_view_literals;
 
